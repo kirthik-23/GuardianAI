@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Guardian AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<h1>🤖 Guardian AI</h1>
+
+<p>Welcome, Kirthik!</p>
+
+<input type="text" id="message" placeholder="Type your message here">
+
+<button onclick="sendMessage()">Send</button>
+<button onclick="startListening()">🎤</button>
+
+<div id="chat"></div>
+
+<script>
+function sendMessage() {
+
+    let message = document.getElementById("message").value;
+    document.getElementById("reply").innerHTML ="<b>Guardian:</b> 🤖 Thinking...";
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            message: message
+        })
+    })
+
+    .then(response => response.json())
+
+    .then(data => {
+        let chat = document.getElementById("chat");
+
+        chat.innerHTML += `
+         <div style="text-align:right; margin:10px;">
+             <span style="background:#00bcd4;color:white;padding:10px;border-radius:15px;">
+                 You: ${message}
+             </span>
+         </div>
+
+         <div style="text-align:left; margin:10px;">
+             <span style="background:#444;color:white;padding:10px;border-radius:15px;">
+                Guardian: ${data.reply}
+             </span>
+         </div>
+        
+        `;
+
+         speak(data.reply);
+         document.getElementById("message").value = "";
+        .catch(error => console.log(error));
+        }
+    });
+}
+document.getElementById("message").onkeypress = function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+    }
+};
+function speak(text) {
+    window.speechSynthesis.cancel();
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "en-US";
+    speech.rate = 1;
+    speech.pitch = 1;
+    speech.volume = 1;
+    window.speechSynthesis.speak(speech);
+}
+function startListening() {
+    const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+    recognition.start();
+    recognition.onresult = function(event) {
+         document.getElementById("message").value =
+         event.results[0][0].transcript;
+         sendMessage();
+    };
+}
+            
+
+</script>
+
+</body>
+</html>

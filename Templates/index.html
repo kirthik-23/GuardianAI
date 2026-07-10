@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Guardian AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+<div class="container">
+    <div class="header">
+<div class="orb"></div>
+
+<h1>GUARDIAN AI</h1>
+
+<h3>Created by Kirthik</h3>
+
+<p class="powered">Powered by Groq AI</p>
+
+<p id="status">🟢 Guardian Online</p>
+
+<p class="welcome">Welcome back, Kirthik.</p>
+
+<div class="status-bar">
+
+<span class="badge">🟢 Online</span>
+
+<span class="badge">🎤 Voice Ready</span>
+
+<span class="badge">🧠 Memory</span>
+
+<span class="badge">⚡ Groq</span>
+
+</div>
+
+<div class="input-area">
+
+<input
+type="text"
+id="message"
+placeholder="Ask Guardian anything...">
+
+<button id="sendBtn" onclick="sendMessage()">➤</button>
+
+<button onclick="startListening()">🎤</button>
+
+</div>
+<div id="chat"></div>
+
+
+<script>
+let isThinking = false;
+function sendMessage() {
+    if (isThinking) return;
+
+    isThinking = true;
+     
+    let message = document.getElementById("message").value;
+    let sendBtn = document.getElementById("sendBtn");
+    sendBtn.disabled = true;
+    sendBtn.innerText = "Thinking...";
+    
+    document.getElementById("status").innerHTML =
+    "🟡 Guardian Thinking...";
+    
+    let chat = document.getElementById("chat");
+    chat.innerHTML += `
+   <div class="bot-message" id="thinking">
+   <span>🤖 Guardian is thinking...</span>
+   </div>
+   `;
+
+    chat.scrollTo({
+        top: chat.scrollHeight,
+        behavior: "smooth"
+    });
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            message: message
+        })
+    })
+
+    .then(response => response.json())
+
+    .then(data => {
+        document.getElementById("thinking").remove();
+        let chat = document.getElementById("chat");
+
+        chat.innerHTML += `
+          <div class="user-message">
+             <span>You: ${message}</span>
+          </div>
+
+          <div class="bot-message">
+              <span>Guardian: ${data.reply}</span>
+        </div>
+        `;
+
+         speak(data.reply);
+        document.getElementById("status").innerHTML =
+        "🔊 Guardian Speaking...";
+         document.getElementById("message").value = "";
+        document.getElementById("status").innerHTML =
+        "🟢 Guardian Online";
+        sendBtn.disabled = false;
+        sendBtn.innerText = "Send";
+        isThinking = false;
+         chat.scrollTop = chat.scrollHeight
+        })
+        .catch(error => console.log(error));
+        }
+document.getElementById("message").onkeypress = function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+    }
+};
+function speak(text) {
+    window.speechSynthesis.cancel();
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "en-US";
+    speech.rate = 1;
+    speech.pitch = 1;
+    speech.volume = 1;
+    window.speechSynthesis.speak(speech);
+}
+function startListening() {
+    const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+    recognition.start();
+    recognition.onresult = function(event) {
+         document.getElementById("message").value =
+         event.results[0][0].transcript;
+         sendMessage();
+    };
+}
+            
+
+</script>
+</div>
+</body>
+</html>
