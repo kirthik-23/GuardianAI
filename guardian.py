@@ -9,8 +9,8 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def ask_guardian(user_input):
     question=user_input.lower().strip()
-    today = datetime.now(india).strftime("%d %B %Y")
     india = pytz.timezone("Asia/Kolkata")
+    today = datetime.now(india).strftime("%d %B %Y")
     current_time = datetime.now(india).strftime("%I:%M:%S %p")
     print("Question received:",question)
     time_keywords = ["time","what is the time","what's the time","current time","tell me the time","can you tell me the time"]
