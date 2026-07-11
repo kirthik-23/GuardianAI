@@ -69,10 +69,7 @@ function sendMessage() {
    </div>
    `;
 
-    chat.scrollTo({
-        top: chat.scrollHeight,
-        behavior: "smooth"
-    });
+    scrollChat();
 
     fetch("/chat", {
         method: "POST",
@@ -109,7 +106,7 @@ function sendMessage() {
         sendBtn.disabled = false;
         sendBtn.innerText = "Send";
         isThinking = false;
-         chat.scrollTop = chat.scrollHeight
+         scrollChat();
         })
         .catch(error => console.log(error));
         }
@@ -138,7 +135,16 @@ function startListening() {
          sendMessage();
     };
 }
-            
+
+function scrollChat() {
+    let chat = document.getElementById("chat");
+
+    chat.scrollTo({
+        top: chat.scrollHeight,
+        behavior: "smooth"
+    });
+}
+         
 
 </script>
 </div>
