@@ -16,8 +16,9 @@ def ask_guardian(user_input):
     time_keywords = ["time","what is the time","what's the time","current time","tell me the time","can you tell me the time"]
     
     if question in time_keywords:
-        current_time = datetime.now().strftime("%I:%M:%S %p")
-        return "The current time is" + current_time
+         return "The current time is " + current_time
+        
+    
     
     if "who created you" in question or "who made you" in question:
         return (
