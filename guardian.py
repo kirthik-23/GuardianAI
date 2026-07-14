@@ -3,12 +3,16 @@ import pytz
 import webbrowser
 from groq import Groq
 from datetime import datetime
+from offline_brain import offline_reply
 from dotenv import load_dotenv
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def ask_guardian(user_input):
     question=user_input.lower().strip()
+    offline_answer = offline_reply(question)
+    if offline_answer:
+        return offline_answer
     india = pytz.timezone("Asia/Kolkata")
     today = datetime.now(india).strftime("%d %B %Y")
     current_time = datetime.now(india).strftime("%I:%M:%S %p")
