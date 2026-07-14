@@ -6,70 +6,95 @@
 </head>
 
 <body>
-<div class="container">
+
+<div id="loginScreen">
+
+    <h1>GUARDIAN AI</h1>
+
+    <p>Authentication Required</p>
+
+    <input
+        type="password"
+        id="password"
+        placeholder="Enter Access Code">
+
+    <br><br>
+
+    <button onclick="authenticate()">
+        Unlock Guardian
+    </button>
+
+</div>
+
+<div class="container" id="mainApp" style="display:none;">
+
+    <div class="background-effects">
+        <div class="grid"></div>
+        <div class="scanline"></div>
+    </div>
+
     <div class="header">
-<div class="orb"></div>
+        <div class="orb"></div>
 
-<h1>GUARDIAN AI</h1>
+        <h1>GUARDIAN AI</h1>
 
-<h3>Created by Kirthik</h3>
+        <h3>Created by Kirthik</h3>
 
-<p class="powered">Powered by Groq AI</p>
+        <p class="powered">Powered by Groq AI</p>
 
-<p id="status">🟢 Guardian Online</p>
+        <p id="status">🟢 Guardian Online</p>
 
-<p class="welcome">Welcome back, Kirthik.</p>
+        <p class="welcome">Welcome back, Kirthik.</p>
 
-<div class="status-bar">
+        <div class="status-bar">
+            <span class="badge">🟢 Online</span>
+            <span class="badge">🎤 Voice Ready</span>
+            <span class="badge">🧠 Memory</span>
+            <span class="badge">⚡ Groq</span>
+        </div>
 
-<span class="badge">🟢 Online</span>
+        <div class="input-area">
 
-<span class="badge">🎤 Voice Ready</span>
+            <input
+                type="text"
+                id="message"
+                placeholder="Ask Guardian anything...">
 
-<span class="badge">🧠 Memory</span>
+            <button id="sendBtn" onclick="sendMessage()">➤</button>
 
-<span class="badge">⚡ Groq</span>
+            <button onclick="startListening()">🎤</button>
+
+        </div>
+
+        <div id="chat"></div>
+
+    </div>
 
 </div>
-
-<div class="input-area">
-
-<input
-type="text"
-id="message"
-placeholder="Ask Guardian anything...">
-
-<button id="sendBtn" onclick="sendMessage()">➤</button>
-
-<button onclick="startListening()">🎤</button>
-
-</div>
-<div id="chat"></div>
-
 
 <script>
+
 let isThinking = false;
+
 function sendMessage() {
+
     if (isThinking) return;
 
+    let message = document.getElementById("message").value.trim();
+
+    if (message === "") return;
+
     isThinking = true;
-     
-    let message = document.getElementById("message").value;
+
     let sendBtn = document.getElementById("sendBtn");
+    let chat = document.getElementById("chat");
+    let orb = document.querySelector(".orb");
+
     sendBtn.disabled = true;
     sendBtn.innerText = "Thinking...";
-    
-    document.getElementById("status").innerHTML =
-    "🟡 Guardian Thinking...";
-    
-    let chat = document.getElementById("chat");
-    chat.innerHTML += `
-   <div class="bot-message" id="thinking">
-   <span>🤖 Guardian is thinking...</span>
-   </div>
-   `;
 
-    scrollChat();
+    document.getElementById("status").innerHTML = "🟡 Guardian Thinking...";
+    orb.classList.add("thinking");
 
     fetch("/chat", {
         method: "POST",
@@ -84,69 +109,165 @@ function sendMessage() {
     .then(response => response.json())
 
     .then(data => {
-        document.getElementById("thinking").remove();
-        let chat = document.getElementById("chat");
 
         chat.innerHTML += `
-          <div class="user-message">
-             <span>You: ${message}</span>
-          </div>
+            <div class="user-message">
+                <strong>👤 You</strong><br>
+                <span>${message}</span>
+            </div>
 
-          <div class="bot-message">
-              <span>Guardian: ${data.reply}</span>
-        </div>
+            <div class="bot-message">
+                <strong>🤖 Guardian</strong><br>
+                <span id="botReply"></span>
+            </div>
         `;
 
-         speak(data.reply);
-        document.getElementById("status").innerHTML =
-        "🔊 Guardian Speaking...";
-         document.getElementById("message").value = "";
-        document.getElementById("status").innerHTML =
-        "🟢 Guardian Online";
+        scrollChat();
+
+        orb.classList.remove("thinking");
+        orb.classList.add("speaking");
+
+        document.getElementById("status").innerHTML = "🔊 Guardian Speaking...";
+
+        typeReply(data.reply);
+
+        document.getElementById("message").value = "";
+
         sendBtn.disabled = false;
-        sendBtn.innerText = "Send";
+        sendBtn.innerText = "➤";
         isThinking = false;
-         scrollChat();
-        })
-        .catch(error => console.log(error));
-        }
-document.getElementById("message").onkeypress = function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        sendMessage();
-    }
-};
-function speak(text) {
-    window.speechSynthesis.cancel();
-    let speech = new SpeechSynthesisUtterance(text);
-    speech.lang = "en-US";
-    speech.rate = 1;
-    speech.pitch = 1;
-    speech.volume = 1;
-    window.speechSynthesis.speak(speech);
+
+    })
+
+    .catch(error => {
+
+        console.log(error);
+
+        orb.classList.remove("thinking");
+
+        document.getElementById("status").innerHTML = "🔴 Error";
+
+        sendBtn.disabled = false;
+        sendBtn.innerText = "➤";
+
+        isThinking = false;
+
+    });
+
 }
-function startListening() {
-    const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = "en-US";
-    recognition.start();
-    recognition.onresult = function(event) {
-         document.getElementById("message").value =
-         event.results[0][0].transcript;
-         sendMessage();
-    };
+document.getElementById("message").addEventListener("keypress",function(e){
+
+    if(e.key==="Enter"){
+
+        e.preventDefault();
+
+        sendMessage();
+
+    }
+
+});
+
+function speak(text){
+
+    window.speechSynthesis.cancel();
+
+    let speech=new SpeechSynthesisUtterance(text);
+
+    speech.lang="en-US";
+
+    speech.rate=1;
+
+    speech.pitch=1;
+
+    speech.volume=1;
+
+    window.speechSynthesis.speak(speech);
+
 }
 
-function scrollChat() {
-    let chat = document.getElementById("chat");
+function startListening(){
+
+    const recognition=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
+
+    recognition.lang="en-US";
+
+    recognition.start();
+
+    recognition.onresult=function(event){
+
+        document.getElementById("message").value=
+        event.results[0][0].transcript;
+
+        sendMessage();
+
+    };
+
+}
+
+function typeReply(text) {
+
+    let replyBox = document.getElementById("botReply");
+
+    let index = 0;
+
+    let typing = setInterval(() => {
+
+        replyBox.innerHTML = text.substring(0, index + 1) + "<span class='cursor'>|</span>";
+
+        index++;
+
+        scrollChat();
+
+        if(index >= text.length){
+
+            clearInterval(typing);
+
+            replyBox.innerHTML = text;
+
+            speak(text);
+
+        }
+
+    },25);
+
+}
+
+function scrollChat(){
+
+    let chat=document.getElementById("chat");
 
     chat.scrollTo({
-        top: chat.scrollHeight,
-        behavior: "smooth"
+
+        top:chat.scrollHeight,
+
+        behavior:"smooth"
+
     });
+
 }
-         
+
+function authenticate(){
+
+    let password =
+    document.getElementById("password").value;
+
+    if(password==="231109"){
+
+        document.getElementById("loginScreen").style.display="none";
+
+        document.getElementById("mainApp").style.display="block";
+
+    }
+
+    else{
+
+        alert("Wrong Access Code");
+
+    }
+
+}
 
 </script>
-</div>
+
 </body>
 </html>
