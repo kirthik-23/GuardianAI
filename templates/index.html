@@ -44,7 +44,23 @@
 
         <p id="status">🟢 Guardian Online</p>
 
-        <p class="welcome">Welcome back, Kirthik.</p>
+        <p class="welcome" id="welcomeText"></p>
+
+        <div id="hud">
+
+            <div>🕒 <span id="clock"></span></div>
+
+            <div>🌐 <span id="internetStatus">Checking...</span></div>
+
+            <div>🧠 Hybrid Brain</div>
+
+            <div>💬 <span id="conversationCount">0</span> Chats</div>
+
+            <div>⏱ <span id="uptime">0m 0s</span></div>
+
+            <div>🎤 Ready</div>
+
+       </div>
 
         <div class="status-bar">
             <span class="badge">🟢 Online</span>
@@ -75,6 +91,7 @@
 <script>
 
 let isThinking = false;
+let conversationCount = 0;
 
 function sendMessage() {
 
@@ -109,6 +126,10 @@ function sendMessage() {
     .then(response => response.json())
 
     .then(data => {
+        conversationCount++;
+
+        document.getElementById("conversationCount").innerHTML =
+        conversationCount;
 
         chat.innerHTML += `
             <div class="user-message">
@@ -252,10 +273,35 @@ function authenticate(){
     document.getElementById("password").value;
 
     if(password==="231109"){
+        const login = document.getElementById("loginScreen");
+    login.innerHTML = `
+        <h1>GUARDIAN AI</h1>
+        <h2 id="bootText">Authenticating...</h2>
+        <div class="boot-bar">
+            <div class="boot-fill"></div>
+        </div>
 
-        document.getElementById("loginScreen").style.display="none";
+    `;
+    setTimeout(()=>{
+        document.getElementById("bootText").innerHTML="✓ Identity Verified";
+        },1000);
 
+    setTimeout(()=>{
+        document.getElementById("bootText").innerHTML="Loading Guardian Core...";
+    },2000);
+
+    setTimeout(()=>{
+        document.getElementById("bootText").innerHTML="✓ Voice System Ready";
+    },3000);
+
+    setTimeout(()=>{
+        document.getElementById("bootText").innerHTML="Welcome back, Sir.";
+    },4000);
+
+    setTimeout(()=>{
+        login.style.display="none";
         document.getElementById("mainApp").style.display="block";
+    },5000);
 
     }
 
@@ -266,6 +312,88 @@ function authenticate(){
     }
 
 }
+
+function updateHUD(){
+
+    let now = new Date();
+
+    document.getElementById("clock").innerHTML =
+        now.toLocaleTimeString();
+
+    document.getElementById("internetStatus").innerHTML =
+        navigator.onLine ? "Online" : "Offline";
+
+}
+
+setInterval(updateHUD,1000);
+
+updateHUD();
+
+function updateGreeting(){
+
+    let hour = new Date().getHours();
+
+    let greeting = "";
+
+    if(hour < 12){
+
+        greeting = "🌅 Good Morning, Sir.";
+
+    }
+
+    else if(hour < 17){
+
+        greeting = "☀️ Good Afternoon, Sir.";
+
+    }
+
+    else if(hour < 21){
+
+        greeting = "🌇 Good Evening, Sir.";
+
+    }
+
+    else{
+
+        greeting = "🌙 Good Night, Sir.";
+
+    }
+
+    document.getElementById("welcomeText").innerHTML = greeting;
+
+}
+
+updateGreeting();
+
+window.addEventListener("online", () => {
+
+    document.getElementById("internetStatus").innerHTML = "Online";
+
+});
+
+window.addEventListener("offline", () => {
+
+    document.getElementById("internetStatus").innerHTML = "Offline";
+
+});
+
+const startTime = Date.now();
+
+function updateUptime(){
+
+    let seconds =
+    Math.floor((Date.now()-startTime)/1000);
+
+    let mins = Math.floor(seconds/60);
+
+    seconds %=60;
+
+    document.getElementById("uptime").innerHTML =
+    mins+"m "+seconds+"s";
+
+}
+
+setInterval(updateUptime,1000);
 
 </script>
 

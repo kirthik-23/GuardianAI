@@ -446,3 +446,76 @@ transform:rotate(360deg);
         opacity:0;
     }
 }
+
+/* Guardian Boot Screen */
+
+.boot-bar{
+
+    width:300px;
+    height:12px;
+
+    background:#1b2a3d;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    margin-top:20px;
+
+    border:1px solid cyan;
+
+}
+
+.boot-fill{
+
+    width:0%;
+
+    height:100%;
+
+    background:linear-gradient(90deg,#00ffff,#0088ff);
+
+    animation:bootLoad 5s linear forwards;
+
+}
+
+@keyframes bootLoad{
+
+    from{
+        width:0%;
+    }
+
+    to{
+        width:100%;
+    }
+
+}
+
+#hud{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:25px;
+
+    flex-wrap:wrap;
+
+    margin:18px 0;
+
+    color:#9fefff;
+
+    font-size:15px;
+
+}
+
+#hud div{
+
+    background:rgba(0,255,255,.08);
+
+    padding:8px 15px;
+
+    border-radius:12px;
+
+    border:1px solid rgba(0,255,255,.18);
+
+}
