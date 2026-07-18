@@ -1,3 +1,4 @@
+import json
 import guardian
 from flask import Flask, render_template, request, jsonify, session
 
@@ -25,6 +26,20 @@ def chat():
     return jsonify({
          "reply": reply
     })
+@app.route("/memory")
+def memory():
+
+    try:
+
+        with open("memory.json", "r", encoding="utf-8") as f:
+
+            data = json.load(f)
+
+    except:
+
+        data = {}
+
+    return jsonify(data)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

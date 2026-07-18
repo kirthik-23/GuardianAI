@@ -34,7 +34,12 @@
     </div>
 
     <div class="header">
-        <div class="orb"></div>
+        <div class="jarvis-core">
+            <div class="core"></div>
+            <div class="ring ring1"></div>
+            <div class="ring ring2"></div>
+            <div class="ring ring3"></div>
+        </div>
 
         <h1>GUARDIAN AI</h1>
 
@@ -81,10 +86,58 @@
             <button onclick="startListening()">🎤</button>
 
         </div>
+    </div>
+    
 
-        <div id="chat"></div>
+        <div class="main-content">
+            <div id="chat">
+            </div>
+
+            <div class="mission-panel">
+
+                <h2>🎯 Mission Control</h2>
+
+                <div class="mission-card">
+                    <h3>Current Mission</h3>
+
+                    <p id="currentMission">
+                        Guardian AI Development
+                   </p>
+                </div>
+                <div class="mission-card">
+                    <h3>Today's Goal</h3>
+
+                    <p id="todayGoal">
+                        Build Guardian like Jarvis.
+                   </p>
+                </div>
+
+                <div class="mission-card">
+                    <h3>System Status</h3>
+                    <p>🟢 Operational</p>
+                </div>
+
+                <div class="mission-card">
+                    <h3>Progress</h3>
+                    <p id="progressValue">0%</p>
+                </div>
+
+                <div class="mission-card">
+
+                    <h3>🧠 Guardian Memory</h3>
+
+                    <div id="memoryPanel">
+                        <p>No memories yet.</p>
+                    </div>
+                </div>
+            </div>
 
     </div>
+
+</div>
+            </div>
+
+     </div>
 
 </div>
 
@@ -105,12 +158,13 @@ function sendMessage() {
 
     let sendBtn = document.getElementById("sendBtn");
     let chat = document.getElementById("chat");
-    let orb = document.querySelector(".orb");
+    let orb = document.querySelector(".jarvis-core");
 
     sendBtn.disabled = true;
     sendBtn.innerText = "Thinking...";
 
     document.getElementById("status").innerHTML = "🟡 Guardian Thinking...";
+    orb.classList.remove("speaking","listening","offline");
     orb.classList.add("thinking");
 
     fetch("/chat", {
@@ -190,22 +244,28 @@ document.getElementById("message").addEventListener("keypress",function(e){
 
 function speak(text){
 
+    let orb = document.querySelector(".jarvis-core");
+
     window.speechSynthesis.cancel();
 
-    let speech=new SpeechSynthesisUtterance(text);
+    let speech = new SpeechSynthesisUtterance(text);
 
-    speech.lang="en-US";
+    speech.lang = "en-US";
+    speech.rate = 1;
+    speech.pitch = 1;
+    speech.volume = 1;
 
-    speech.rate=1;
+    speech.onstart = function(){
+        orb.classList.add("speaking");
+    };
 
-    speech.pitch=1;
-
-    speech.volume=1;
+    speech.onend = function(){
+        orb.classList.remove("speaking");
+    };
 
     window.speechSynthesis.speak(speech);
 
 }
-
 function startListening(){
 
     const recognition=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
@@ -214,10 +274,16 @@ function startListening(){
 
     recognition.start();
 
+    orb.classList.remove("thinking","speaking","offline");
+
+    orb.classList.add("listening");
+
     recognition.onresult=function(event){
 
         document.getElementById("message").value=
         event.results[0][0].transcript;
+
+        orb.classList.remove("listening");
 
         sendMessage();
 
@@ -246,6 +312,10 @@ function typeReply(text) {
             replyBox.innerHTML = text;
 
             speak(text);
+
+            setTimeout(()=>{
+                orb.classList.remove("speaking");
+            },3000);
 
         }
 
@@ -393,7 +463,87 @@ function updateUptime(){
 
 }
 
+function updateMission() {
+
+    document.getElementById("currentMission").innerHTML =
+    "Dynamic Mission Control";
+
+    document.getElementById("todayGoal").innerHTML =
+    "Build Permanent Memory";
+
+    document.getElementById("progress").innerHTML =
+    "25%";
+
+}
+
+updateMission();
+
 setInterval(updateUptime,1000);
+
+function loadMemory(){
+
+    fetch("/memory")
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        let panel = document.getElementById("memoryPanel");
+
+        panel.innerHTML = "";
+
+        let keys = Object.keys(data);
+
+        if(keys.length === 0){
+
+            panel.innerHTML = "<p>No memories yet.</p>";
+
+            return;
+
+        }
+
+        keys.forEach(key => {
+
+            panel.innerHTML += `
+                <p>
+                    <b>${key}</b><br>
+                    ${data[key]}
+                </p>
+                <hr>
+            `;
+
+        });
+
+    });
+
+}
+
+loadMemory();
+
+setInterval(loadMemory,3000);
+
+function updateProgress(){
+
+    fetch("/memory")
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        let total = Object.keys(data).length;
+
+        let percent = Math.min(total * 10, 100);
+
+        document.getElementById("progressValue").innerHTML =
+        percent + "%";
+
+    });
+
+}
+
+updateProgress();
+
+setInterval(updateProgress,3000);
 
 </script>
 
