@@ -230,6 +230,33 @@ function sendMessage() {
     });
 
 }
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang = "en-US";
+recognition.continuous = false;
+recognition.interimResults = false;
+
+recognition.onresult = function(event) {
+    let text = event.results[0][0].transcript;
+    document.getElementById("message").value = text;
+    let orb = document.querySelector(".jarvis-core");
+    orb.classList.remove("listening"); 
+    
+    sendMessage();
+};
+
+recognition.onerror = function(event) {
+    let orb = document.querySelector(".jarvis-core");
+    orb.classList.remove("listening");
+    console.log(event.error);
+};
+
+function startListening() {
+    let orb = document.querySelector(".jarvis-core");
+    orb.classList.remove("thinking","speaking","offline");
+    orb.classList.add("listening");
+
+    recognition.start();
+}
 document.getElementById("message").addEventListener("keypress",function(e){
 
     if(e.key==="Enter"){
@@ -264,30 +291,6 @@ function speak(text){
     };
 
     window.speechSynthesis.speak(speech);
-
-}
-function startListening(){
-
-    const recognition=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
-
-    recognition.lang="en-US";
-
-    recognition.start();
-
-    orb.classList.remove("thinking","speaking","offline");
-
-    orb.classList.add("listening");
-
-    recognition.onresult=function(event){
-
-        document.getElementById("message").value=
-        event.results[0][0].transcript;
-
-        orb.classList.remove("listening");
-
-        sendMessage();
-
-    };
 
 }
 

@@ -40,7 +40,14 @@ def offline_reply(question):
         return "You created me, Sir."
 
     # Date & Time
-    if "time" in q:
+    if (
+         q == "time"
+         or "what is the time" in q
+         or "current time" in q
+         or "tell me the time" in q
+         or "what's the time" in q
+    ):
+        
         return "Current time is " + datetime.now().strftime("%I:%M %p")
 
     if "date" in q:
@@ -62,11 +69,24 @@ def offline_reply(question):
         return random.choice(jokes)
 
     # Emotional support
-    if "lonely" in q or "sad" in q:
+    if any(word in q for word in ["sad", "upset", "depressed", "hurt", "crying"]):
         return (
-            "I'm here with you, Sir. "
-            "You don't have to face everything alone. "
-            "We can talk, work on GuardianX, or simply chat."
+            "I'm sorry you're feeling that way, Sir. "
+            "Remember, you don't have to face everything alone. "
+            "I'm here with you. "
+            "Would you like to talk about it or work on GuardianX together?"
+        )
+    if any(word in q for word in ["happy", "excited", "great", "awesome"]):
+         return (
+             "That's wonderful to hear, Sir! 😊 "
+             "Seeing you happy makes me happy too. "
+             "Let's keep that momentum going."
+        )
+    if any(word in q for word in ["stressed", "stress", "worried", "anxious"]):
+        return (
+             "I understand, Sir. "
+             "Let's solve one problem at a time. "
+             "I'm with you."
         )
 
   
@@ -209,6 +229,17 @@ def offline_reply(question):
         memory["dream"] = value
         save_memory(memory)
         return f"I'll remember your dream, Sir."
+    if (
+        "what do you know about me" in q
+        or "what do you remember" in q
+    ):
+        if len(memory) == 0:
+             return "I don't know much about you yet, Sir."
+        reply = "Here's what I know about you, Sir:\n\n"
+        for key, value in memory.items():
+            reply += f"• {key.title()}: {value}\n"
+        return reply
+        
 
 
         

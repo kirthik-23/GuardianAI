@@ -9,6 +9,21 @@ app.secret_key = "guardian_secret_key"
 def home():
     return render_template("index.html")
 
+
+@app.route("/listen", methods=["GET"])
+def listen():
+    text = guardian.listen()
+    if text is None:
+        return jsonify({
+            "heard": "",
+            "reply": "Sorry Sir, I couldn't hear you."
+        })
+    reply = guardian.ask_guardian(text)
+
+    return jsonify({
+        "heard": text,
+        "reply": reply
+     })
 @app.route("/chat", methods=["POST"])
 def chat():
 
@@ -42,5 +57,10 @@ def memory():
     return jsonify(data)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(
+         host="0.0.0.0",
+         port=5000,
+         debug=False,
+         use_reloader=False
+    )
     
